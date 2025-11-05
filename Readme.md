@@ -4,33 +4,89 @@
 A command-line tool designed to parse and analyze SQL CREATE TABLE queries. Developed in Rust, it uses the pest parser generator to produce a well-structured Abstract Syntax Tree (AST) that represents the input query.
 
 ## Technical Description
-This tool parses `CREATE TABLE` statements. The parser identifies the table name and a list of column definitions using a `pest` grammar.
+This tool parses `CREATE TABLE` statements. The parser identifies the table name and a list of column definitions. Each column definition consists of a column name and its corresponding data type.
 
-Each column definition is broken down into its **name** and **data type** (e.g., `INT`, `TEXT`, `VARCHAR(255)`).
+Supported data types:
+* `INT`
+* `TEXT`
+* `BOOLEAN`
+* `DATE`
+* `VARCHAR(n)` (where 'n' is a number)
 
-The parsing process generates a Rust struct (`CreateTableQuery`) that mirrors the query's structure. This AST can then be used for:
-* Validating database schema syntax.
-* Tools for analyzing or migrating database structures.
-* Automatic code generation.
+The parsing process uses a `pest` grammar to generate a parse tree, which is then traversed to build a strongly-typed AST (`CreateTableQuery`). This AST can be used for schema validation, code generation, or database migration analysis.
 
-## Grammar
-WHITESPACE = _{" " | "\t" | "\r" | "\n"}
+## Features
+* Parse SQL CREATE TABLE Queries.
+* Abstract Syntax Tree (AST) Generation.
+* Simple Command-Line Interface.
+* Detailed error handling with `thiserror`.
+* Includes `Makefile` for easy building, testing, and linting.
 
-CREATE = {"CREATE" | "create"}
-TABLE = {"TABLE" | "table"}
+## AST (Data Structures)
+* **CreateTableQuery**:
+    * `table_name`: The name of the table.
+    * `columns`: A `Vec<ColumnDef>` of column definitions.
+* **ColumnDef**:
+    * `name`: The name of the column.
+    * `data_type`: A `DataType` enum.
+* **DataType** (enum):
+    * `Simple(String)`: e.g., INT, TEXT.
+    * `Varchar(u64)`: e.g., VARCHAR(255).
 
-identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
+## Installation
+Clone the repository:
+```unix
+git clone https://github.com/prymochenkovictoria/sql_create_parser
+cd sql_create_parser
+```
 
-number = @{ASCII_DIGIT+}
-
-simple_type = @{"INT" | "int" | "TEXT" | "text" | "BOOLEAN" | "boolean" | "DATE" | "date"}
-
-varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
-
-data_type = {simple_type | varchar_type}
-
-column_definition = {identifier ~ data_type}
-
-column_list = {column_definition ~ ("," ~ column_definition)*}
-
-create_query = {SOI ~ CREATE ~ TABLE ~ identifier ~ "(" ~ column_list ~ ")" ~ (";")? ~ EOI}
+## Example 
+We have an example file: 
+```
+CREATE TABLE users (
+    user_id INT,
+    username VARCHAR(100),
+    email TEXT,
+    is_active BOOLEAN,
+    created_at DATE
+);
+```
+It will be parsed like this:
+```
+Parsed Query:
+CreateTableQuery {
+    table_name: "users",
+    columns: [
+        ColumnDef {
+            name: "user_id",
+            data_type: Simple(
+                "INT",
+            ),
+        },
+        ColumnDef {
+            name: "username",
+            data_type: Varchar(
+                100,
+            ),
+        },
+        ColumnDef {
+            name: "email",
+            data_type: Simple(
+                "TEXT",
+            ),
+        },
+        ColumnDef {
+            name: "is_active",
+            data_type: Simple(
+                "BOOLEAN",
+            ),
+        },
+        ColumnDef {
+            name: "created_at",
+            data_type: Simple(
+                "DATE",
+            ),
+        },
+    ],
+}
+```

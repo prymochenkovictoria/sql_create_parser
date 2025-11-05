@@ -1,36 +1,36 @@
-/// Matches any amount of whitespace (spaces, tabs, newlines).
+/// Matches any amount of whitespace (spaces, tabs, newlines)
 WHITESPACE = _{" " | "\t" | "\r" | "\n"}
 
-/// Matches the `CREATE` keyword.
+/// Matches the `CREATE` keyword
 CREATE = {"CREATE" | "create"}
-/// Matches the `TABLE` keyword.
+/// Matches the `TABLE` keyword
 TABLE = {"TABLE" | "table"}
 
-/// Matches an identifier, such as table or column names.
-/// Identifiers start with a letter or underscore and can contain alphanumeric characters and underscores.
+/// Matches an identifier, such as table or column names
+/// Identifiers start with a letter or underscore and can contain alphanumeric characters and underscores
 identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
 
-/// Matches numeric literals (used for VARCHAR length).
+/// Matches numeric literals (used for VARCHAR length)
 number = @{ASCII_DIGIT+}
 
 // Data Type Rules
-/// Matches a simple data type without parameters (e.g., INT, TEXT, BOOLEAN).
+/// Matches a simple data type without parameters (e.g., INT, TEXT, BOOLEAN)
 simple_type = @{"INT" | "int" | "TEXT" | "text" | "BOOLEAN" | "boolean" | "DATE" | "date"}
 
-/// Matches the VARCHAR data type with a specified length, e.g., VARCHAR(255).
+/// Matches the VARCHAR data type with a specified length, e.g., VARCHAR(255)
 varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
 
-/// Matches any supported data type.
+/// Matches any supported data type
 data_type = {simple_type | varchar_type}
 
 // Column Definition Rules
 /// Matches a single column definition, e.g., "user_id INT"
 column_definition = {identifier ~ data_type}
 
-/// Matches a comma-separated list of column definitions.
+/// Matches a comma-separated list of column definitions
 column_list = {column_definition ~ ("," ~ column_definition)*}
 
 // Main Query Rule
-/// Matches an entire `CREATE TABLE` query.
+/// Matches an entire `CREATE TABLE` query
 /// e.g., CREATE TABLE users (id INT, name VARCHAR(100));
 create_query = {SOI ~ CREATE ~ TABLE ~ identifier ~ "(" ~ column_list ~ ")" ~ (";")? ~ EOI}

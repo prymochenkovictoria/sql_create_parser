@@ -1,9 +1,10 @@
+#![doc = include_str!("../docs.md")]
+
+use ::pest_derive::Parser;
 use pest::iterators::Pair;
 use pest::Parser;
-use pest_derive::Parser;
 use thiserror::Error;
 
-/// Main module that contains rules for the parser.
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
 pub struct SQLParser;
