@@ -1,0 +1,14 @@
+[package]
+name = "sql_create_parser"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Victoria Prymochenko"]
+description = "A simple SQL CREATE parser for SQL CREATE TABLE queries."
+
+[dependencies]
+anyhow = "1.0"
+pest = "2.7.14"
+pest_derive = "2.7.14"
+thiserror = "1.0.66" 
+clap = { version = "4.5.20", features = ["derive"] } 
