@@ -1,0 +1,31 @@
+/// Matches any amount of whitespace (spaces, tabs, newlines).
+WHITESPACE = _{" " | "\t" | "\r" | "\n"}
+
+/// Matches the `CREATE` keyword.
+CREATE = {"CREATE" | "create"}
+/// Matches the `TABLE` keyword.
+TABLE = {"TABLE" | "table"}
+
+/// Matches an identifier, such as table or column names.
+identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
+
+/// Matches numeric literals (used for VARCHAR length).
+number = @{ASCII_DIGIT+}
+
+/// Matches a simple data type without parameters (e.g., INT, TEXT).
+simple_type = @{"INT" | "int" | "TEXT" | "text" | "BOOLEAN" | "boolean" | "DATE" | "date"}
+
+/// Matches the VARCHAR data type with a specified length, e.g., VARCHAR(255).
+varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
+
+/// Matches any supported data type.
+data_type = {simple_type | varchar_type}
+
+/// Matches a single column definition, e.g., "user_id INT"
+column_definition = {identifier ~ data_type}
+
+/// Matches a comma-separated list of column definitions.
+column_list = {column_definition ~ ("," ~ column_definition)*}
+
+/// Matches an entire `CREATE TABLE` query.
+create_query = {SOI ~ CREATE ~ TABLE ~ identifier ~ "(" ~ column_list ~ ")" ~ (";")? ~ EOI}
