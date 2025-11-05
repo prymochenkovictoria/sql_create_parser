@@ -1,4 +1,3 @@
-```markdown
 # sql_create_parser
 
 ## Purpose
