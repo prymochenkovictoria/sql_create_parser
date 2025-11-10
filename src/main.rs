@@ -45,11 +45,11 @@ fn main() -> Result<()> {
             };
 
             match parse_query(&content) {
-                Ok(schema) => {
-                    println!("Parsed Query:\n{:#?}", schema);
+                Ok(parsed_query) => {
+                    println!("Parsed Query:\n{:#?}", parsed_query);
                 }
                 Err(e) => {
-                    eprintln!("Error parsing schema: {}", e);
+                    eprintln!("Error parsing query: {}", e);
                     process::exit(1);
                 }
             }
