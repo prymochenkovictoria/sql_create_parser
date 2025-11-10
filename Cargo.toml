@@ -5,6 +5,8 @@ edition = "2021"
 license = "MIT"
 authors = ["Victoria Prymochenko"]
 description = "A simple SQL CREATE parser for SQL CREATE TABLE queries."
+readme = "README.md"
+repository = "https://github.com/prymochenkovictoria/sql_create_parser"
 
 [dependencies]
 pest = "2.7.14"
