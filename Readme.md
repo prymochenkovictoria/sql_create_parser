@@ -94,3 +94,27 @@ CreateTableQuery {
     ],
 }
 ```
+
+## Grammar
+```
+WHITESPACE = _{" " | "\t" | "\r" | "\n"}
+
+CREATE = {"CREATE" | "create"}
+TABLE = {"TABLE" | "table"}
+
+identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
+
+number = @{ASCII_DIGIT+}
+
+simple_type = @{"INT" | "int" | "TEXT" | "text" | "BOOLEAN" | "boolean" | "DATE" | "date"}
+
+varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
+
+data_type = {simple_type | varchar_type}
+
+column_definition = {identifier ~ data_type}
+
+column_list = {column_definition ~ ("," ~ column_definition)*}
+
+create_query = {SOI ~ CREATE ~ TABLE ~ identifier ~ "(" ~ column_list ~ ")" ~ (";")? ~ EOI}
+```
