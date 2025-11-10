@@ -33,6 +33,10 @@ The parsing process uses a `pest` grammar to generate a parse tree, which is the
     * `Simple(String)`: e.g., INT, TEXT.
     * `Varchar(u64)`: e.g., VARCHAR(255).
 
+## LINKS
+[Crate on crates.io](https://crates.io/crates/sql_create_parser)  
+[Documentation on docs.rs](https://docs.rs/sql_create_parser/0.1.0/sql_create_parser/)    
+
 ## Installation
 Clone the repository:
 ```unix
