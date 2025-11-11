@@ -12,10 +12,12 @@ fn test_simple_create_table() -> Result<()> {
             ColumnDef {
                 name: "id".to_string(),
                 data_type: DataType::Simple("INT".to_string()),
+                not_null: false,
             },
             ColumnDef {
                 name: "name".to_string(),
                 data_type: DataType::Simple("TEXT".to_string()),
+                not_null: false,
             },
         ],
     };
@@ -36,6 +38,7 @@ fn test_varchar_type() -> Result<()> {
         ColumnDef {
             name: "sku".to_string(),
             data_type: DataType::Varchar(255),
+            not_null: false, 
         }
     );
     assert_eq!(
@@ -43,6 +46,7 @@ fn test_varchar_type() -> Result<()> {
         ColumnDef {
             name: "price".to_string(),
             data_type: DataType::Simple("INT".to_string()),
+            not_null: false, 
         }
     );
     Ok(())
@@ -55,6 +59,10 @@ fn test_all_types_lowercase() -> Result<()> {
 
     assert_eq!(parsed.table_name, "logs");
     assert_eq!(parsed.columns.len(), 5);
+    
+    assert_eq!(parsed.columns[0].not_null, false); 
+    assert_eq!(parsed.columns[1].not_null, false); 
+
     assert_eq!(
         parsed.columns[2].data_type,
         DataType::Simple("BOOLEAN".to_string())
@@ -82,6 +90,7 @@ fn test_single_column() -> Result<()> {
         ColumnDef {
             name: "setting_key".to_string(),
             data_type: DataType::Varchar(100),
+            not_null: false, 
         }
     );
     Ok(())
@@ -125,4 +134,42 @@ fn test_invalid_varchar_length() {
         result.is_err(),
         "Expected parsing to fail due to non-numeric varchar length"
     );
+}
+
+#[test]
+fn test_not_null_constraint() -> Result<()> {
+    let query = "CREATE TABLE users (id INT NOT NULL, name TEXT, email VARCHAR(100) not null);";
+    let parsed = parse_query(query).context("Failed to parse NOT NULL constraint")?;
+
+    assert_eq!(parsed.table_name, "users");
+    assert_eq!(parsed.columns.len(), 3);
+
+    assert_eq!(
+        parsed.columns[0],
+        ColumnDef {
+            name: "id".to_string(),
+            data_type: DataType::Simple("INT".to_string()),
+            not_null: true,
+        }
+    );
+
+    assert_eq!(
+        parsed.columns[1],
+        ColumnDef {
+            name: "name".to_string(),
+            data_type: DataType::Simple("TEXT".to_string()),
+            not_null: false, 
+        }
+    );
+
+    assert_eq!(
+        parsed.columns[2],
+        ColumnDef {
+            name: "email".to_string(),
+            data_type: DataType::Varchar(100),
+            not_null: true, 
+        }
+    );
+
+    Ok(())
 }

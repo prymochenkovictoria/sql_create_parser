@@ -12,11 +12,12 @@ Supported data types:
 * `BOOLEAN`
 * `DATE`
 * `VARCHAR(n)` (where 'n' is a number)
+* `NOT NULL` constraint
 
 The parsing process uses a `pest` grammar to generate a parse tree, which is then traversed to build a strongly-typed AST (`CreateTableQuery`). This AST can be used for schema validation, code generation, or database migration analysis.
 
 ## Features
-* Parse SQL CREATE TABLE Queries.
+* Parse SQL CREATE TABLE Queries (including `NOT NULL`).
 * Abstract Syntax Tree (AST) Generation.
 * Simple Command-Line Interface.
 * Detailed error handling with `thiserror`.
@@ -29,13 +30,14 @@ The parsing process uses a `pest` grammar to generate a parse tree, which is the
 * **ColumnDef**:
     * `name`: The name of the column.
     * `data_type`: A `DataType` enum.
+    * `not_null`: A `bool` indicating if the `NOT NULL` constraint is present.
 * **DataType** (enum):
     * `Simple(String)`: e.g., INT, TEXT.
     * `Varchar(u64)`: e.g., VARCHAR(255).
 
 ## Links
 [Crate on crates.io](https://crates.io/crates/sql_create_parser)  
-[Documentation on docs.rs](https://docs.rs/sql_create_parser/0.1.0/sql_create_parser/)    
+[Documentation on docs.rs](https://docs.rs/sql_create_parser/latest/sql_create_parser/)    
 
 ## Installation
 Clone the repository:
@@ -49,7 +51,7 @@ We have an example file:
 ```
 CREATE TABLE users (
     user_id INT,
-    username VARCHAR(100),
+    username VARCHAR(100) NOT NULL,
     email TEXT,
     is_active BOOLEAN,
     created_at DATE
@@ -66,30 +68,35 @@ CreateTableQuery {
             data_type: Simple(
                 "INT",
             ),
+            not_null: false,
         },
         ColumnDef {
             name: "username",
             data_type: Varchar(
                 100,
             ),
+            not_null: true,
         },
         ColumnDef {
             name: "email",
             data_type: Simple(
                 "TEXT",
             ),
+            not_null: false,
         },
         ColumnDef {
             name: "is_active",
             data_type: Simple(
                 "BOOLEAN",
             ),
+            not_null: false,
         },
         ColumnDef {
             name: "created_at",
             data_type: Simple(
                 "DATE",
             ),
+            not_null: false,
         },
     ],
 }
@@ -102,6 +109,9 @@ WHITESPACE = _{" " | "\t" | "\r" | "\n"}
 CREATE = {"CREATE" | "create"}
 TABLE = {"TABLE" | "table"}
 
+NOT = {"NOT" | "not"}
+NULL = {"NULL" | "null"}
+
 identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
 
 number = @{ASCII_DIGIT+}
@@ -112,7 +122,9 @@ varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
 
 data_type = {simple_type | varchar_type}
 
-column_definition = {identifier ~ data_type}
+not_null_constraint = {(NOT ~ NULL)}
+
+column_definition = {identifier ~ data_type ~ not_null_constraint?}
 
 column_list = {column_definition ~ ("," ~ column_definition)*}
 

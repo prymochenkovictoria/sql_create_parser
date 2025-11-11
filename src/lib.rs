@@ -21,6 +21,7 @@ pub enum DataType {
 pub struct ColumnDef {
     pub name: String,
     pub data_type: DataType,
+    pub not_null: bool,
 }
 
 /// Main structure for a CREATE TABLE query.
@@ -90,11 +91,30 @@ fn parse_column_list(pair: Pair<Rule>) -> Result<Vec<ColumnDef>, ParseError> {
 
 /// Parses a single column definition.
 fn parse_column_definition(pair: Pair<Rule>) -> Result<ColumnDef, ParseError> {
-    let mut inner = pair.into_inner();
-    let name = inner.next().ok_or(ParseError::InvalidColumnDefinition)?.as_str().to_string();
-    let data_type_pair = inner.next().ok_or(ParseError::InvalidColumnDefinition)?;
-    let data_type = parse_data_type(data_type_pair)?;
-    Ok(ColumnDef { name, data_type })
+    let mut name: Option<String> = None;
+    let mut data_type: Option<DataType> = None;
+    let mut not_null = false;
+
+    for inner in pair.into_inner() {
+        match inner.as_rule() {
+            Rule::identifier => {
+                name = Some(inner.as_str().to_string());
+            }
+            Rule::data_type => {
+                data_type = Some(parse_data_type(inner)?);
+            }
+            Rule::not_null_constraint => {
+                not_null = true;
+            }
+            _ => return Err(ParseError::UnexpectedRule(inner.as_rule())),
+        }
+    }
+
+    Ok(ColumnDef {
+        name: name.ok_or(ParseError::InvalidColumnDefinition)?,
+        data_type: data_type.ok_or(ParseError::InvalidColumnDefinition)?,
+        not_null,
+    })
 }
 
 /// Parses a data type rule into the DataType enum.

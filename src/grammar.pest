@@ -6,8 +6,12 @@ CREATE = {"CREATE" | "create"}
 /// Matches the `TABLE` keyword
 TABLE = {"TABLE" | "table"}
 
+/// Matches the `NOT` keyword
+NOT = {"NOT" | "not"}
+/// Matches the `NULL` keyword
+NULL = {"NULL" | "null"}
+
 /// Matches an identifier, such as table or column names
-/// Identifiers start with a letter or underscore and can contain alphanumeric characters and underscores
 identifier = @{(ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*}
 
 /// Matches numeric literals (used for VARCHAR length)
@@ -23,14 +27,16 @@ varchar_type = {("VARCHAR" | "varchar") ~ "(" ~ number ~ ")"}
 /// Matches any supported data type
 data_type = {simple_type | varchar_type}
 
+/// Matches the "NOT NULL" constraint
+not_null_constraint = {(NOT ~ NULL)}
+
 // Column Definition Rules
-/// Matches a single column definition, e.g., "user_id INT"
-column_definition = {identifier ~ data_type}
+/// Matches a single column definition, e.g., "user_id INT NOT NULL"
+column_definition = {identifier ~ data_type ~ not_null_constraint?}
 
 /// Matches a comma-separated list of column definitions
 column_list = {column_definition ~ ("," ~ column_definition)*}
 
 // Main Query Rule
 /// Matches an entire `CREATE TABLE` query
-/// e.g., CREATE TABLE users (id INT, name VARCHAR(100));
 create_query = {SOI ~ CREATE ~ TABLE ~ identifier ~ "(" ~ column_list ~ ")" ~ (";")? ~ EOI}
